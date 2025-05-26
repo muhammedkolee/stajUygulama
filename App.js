@@ -7,9 +7,8 @@ export default function App() {
       <Text>Deniz Askilotam</Text>
       <View>
         <Text style={styles.daut}>
-          Dauuuddd
+          Hello, World!
         </Text>
-        <Image style = {styles.foto} source={require('./assets/foto.jpg')}/>
       </View>
       <StatusBar style="auto" />
     </View>
@@ -23,12 +22,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // justifyContent: 'center',
   },
-  daut: {
-    backgroundColor: "blue",
-    color: "red"
-  },
-  foto: {
-    height: 400,
-    width: 400
-  }
+
 });
