@@ -1,21 +1,16 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Button, Image, Text, ScrollView, TouchableOpacity } from 'react-native';
+import 'react-native-gesture-handler'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { NavigationContainer } from '@react-navigation/native'
+
+import DrawerNavigation from './navigation/DrawerNavigation'
+
 
 export default function App() {
   return (
-  <View style = {styles.container}>
-    <Text style = {styles.textColor}>Merhaba</Text>
-  </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <DrawerNavigation />
+      </NavigationContainer>
+    </SafeAreaView>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  textColor: {
-    color: "green"
-  }
-});
