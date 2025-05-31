@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { initDatabase, insertAnswerKey } from "../../databases/databaseInit";
 
 const choices = ['A', 'B', 'C', 'D', 'E'];
+
 
 const AnswerKeyScreen = () => {
   const [questionCount, setQuestionCount] = useState('');
   const [answers, setAnswers] = useState([]);
+  const [answerKeyName, setAnswerKeyName] = useState('');
+
+    useEffect(() => {
+    initDatabase();
+  }, []);
 
   // Soru sayısı değişince answers dizisini baştan oluştur
   const handleQuestionCountChange = (text) => {
@@ -31,28 +38,45 @@ const AnswerKeyScreen = () => {
 
   // Gönder butonu için kısa kontrol
   const handleSubmit = () => {
-    if (answers.length === 0) {
-      Alert.alert('Hata', 'Lütfen soru sayısını girin.');
-      return;
-    }
-    if (answers.includes(null)) {
-      Alert.alert('Hata', 'Tüm sorular için cevap seçin.');
+    if (!answerKeyName.trim()) {
+      Alert.alert('Hata', 'Lütfen cevap anahtarına bir isim verin.');
       return;
     }
 
-    Alert.alert('Cevap Anahtarı', answers.join(''));
-    // Burada backend'e göndermek istersen yapabilirsin
+    // Kaydet
+    insertAnswerKey(answerKeyName.trim(), answers)
+      .then(() => {
+        Alert.alert('Başarılı', 'Cevap anahtarı kaydedildi.');
+        setQuestionCount('');
+        setAnswers([]);
+        setAnswerKeyName('');
+      })
+      .catch((err) => {
+        Alert.alert('Hata', 'Cevap anahtarı kaydedilirken hata oluştu.');
+        console.error(err);
+      });
   };
+
+  
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Cevap Anahtarı Oluştur</Text>
 
+      <Text>Cevap Anahtarı İsmi:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Matematik Deneme 1"
+        value={answerKeyName}
+        onChangeText={setAnswerKeyName}
+      />
+
+
       <Text>Soru Sayısı Giriniz:</Text>
       <TextInput
         keyboardType="numeric"
         style={styles.input}
-        placeholder="Örn: 10"
+        placeholder="20"
         value={questionCount}
         onChangeText={handleQuestionCountChange}
       />
@@ -83,6 +107,10 @@ const AnswerKeyScreen = () => {
           </View>
         </View>
       ))}
+
+
+      
+
 
       {answers.length > 0 && (
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
