@@ -154,8 +154,8 @@ export default AnaSayfa;
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingTop: 50,
     backgroundColor: '#e0e0e0',
+    justifyContent: 'flex-start',
   },
   title: {
     fontSize: 22,
