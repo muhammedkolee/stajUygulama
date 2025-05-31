@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   TouchableOpacity,
+  FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
@@ -86,15 +87,20 @@ const AnaSayfa = ({ navigation }) => {
 
       {images.length > 0 && (
         <>
-          <ScrollView horizontal style={{ marginVertical: 10 }}>
-            {images.map((img, idx) => (
-              <Image
-                key={idx}
-                source={{ uri: img }}
-                style={styles.imagePreview}
-              />
-            ))}
-          </ScrollView>
+          <FlatList
+            data={images}
+            keyExtractor={(item, index) => index.toString()}
+            numColumns={3} // Her satıra 3 resim
+            renderItem={({ item }) => (
+              <View style={{ flex: 1, margin: 5 }}>
+                <Image
+                  source={{ uri: item }}
+                  style={styles.imagePreview}
+                />
+              </View>
+            )}
+            contentContainerStyle={{ paddingVertical: 10 }}
+          />
 
           <Text>Seçilen Soru Sayısı: {selectedValue}</Text>
           <Picker
@@ -109,7 +115,7 @@ const AnaSayfa = ({ navigation }) => {
           <Button title="Gönder ve Oku" onPress={uploadImages} />
 
           <Button title="Tümünü Temizle" onPress={clearImages} />
-{/* 
+          {/* 
           <TouchableOpacity onPress={clearImages} style={{ marginTop: 10 }}>
             <Text style={{ color: 'red', textAlign: 'center' }}>Tümünü Temizle</Text>
           </TouchableOpacity> */}
@@ -156,6 +162,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#e0e0e0',
     justifyContent: 'flex-start',
+    flex: 1,
   },
   title: {
     fontSize: 22,
