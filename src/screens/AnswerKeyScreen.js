@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,  // add extra padding so back button doesn’t overlap title
     backgroundColor: '#e0e0e0',
-    backgroundColor: '#fff',
   },
   backButton: {
     position: 'absolute',
