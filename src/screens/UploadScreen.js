@@ -71,10 +71,10 @@ export default UploadScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     backgroundColor: '#e0e0e0',
     justifyContent: 'flex-start',
+    flex: 1,
   },
   title: {
     fontSize: 22,
