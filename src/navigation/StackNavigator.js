@@ -9,7 +9,6 @@ const StackNavigator = () => {
   return (
     <Stack.Navigator initialRouteName="Upload">
       <Stack.Screen name="Upload" component={AnaSayfa} options={{ headerShown: false }} />
-      <Stack.Screen name="AnswerKey" component={AnswerKeyScreen} options={{ title: "Cevap Anahtarı" }} />
     </Stack.Navigator>
   );
 };

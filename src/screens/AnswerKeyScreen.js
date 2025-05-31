@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const choices = ['A', 'B', 'C', 'D', 'E'];
 
 const AnswerKeyScreen = () => {
+  const navigation = useNavigation();
+
   const [questionCount, setQuestionCount] = useState('');
   const [answers, setAnswers] = useState([]);
 
@@ -46,6 +49,11 @@ const AnswerKeyScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Back button top-left */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backButtonText}>←</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Cevap Anahtarı Oluştur</Text>
 
       <Text>Soru Sayısı Giriniz:</Text>
@@ -99,7 +107,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingTop: 60,  // add extra padding so back button doesn’t overlap title
     backgroundColor: '#e0e0e0',
+  },
+  backButton: {
+    position: 'absolute',
+    top: -50,
+    left: -10,
+    backgroundColor: 'grey',
+    
+    paddingBottom: 12,
+    paddingHorizontal: 12,
+    borderRadius: 30,
+    zIndex: 10,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 26,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 22,
