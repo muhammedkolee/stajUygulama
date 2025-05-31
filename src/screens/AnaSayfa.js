@@ -19,6 +19,8 @@ const cevapAnahtari = {
   "16": "A", "17": "B", "18": "C", "19": "D", "20": "E"
 };
 
+// Merhaba
+
 const AnaSayfa = ({ navigation }) => {
   const [images, setImages] = useState([]);
   const [selectedValue, setSelectedValue] = useState('20');
@@ -79,9 +81,6 @@ const AnaSayfa = ({ navigation }) => {
 
   const renderHeader = () => (
     <View>
-  // Header content for FlatList
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
       <Text style={styles.title}>Optik Form Yükle</Text>
       <Button title="Fotoğraf Seç" onPress={pickImage} />
 
@@ -91,14 +90,11 @@ const AnaSayfa = ({ navigation }) => {
             data={images}
             keyExtractor={(item, index) => index.toString()}
             numColumns={3}
-            numColumns={3}
             renderItem={({ item }) => (
               <View style={{ flex: 1, margin: 5 }}>
                 <Image source={{ uri: item }} style={styles.imagePreview} />
-                <Image source={{ uri: item }} style={styles.imagePreview} />
               </View>
             )}
-            scrollEnabled={false} // Yalnızca ana liste scroll edebilir
             scrollEnabled={false} // Yalnızca ana liste scroll edebilir
             contentContainerStyle={{ paddingVertical: 10 }}
           />
@@ -123,16 +119,7 @@ const AnaSayfa = ({ navigation }) => {
           title="Cevap Anahtarı Sayfası"
           onPress={() => navigation.navigate('AnswerKey')}
         />
-        <Button
-          title="Cevap Anahtarı Sayfası"
-          onPress={() => navigation.navigate('AnswerKey')}
-        />
       </View>
-    </View>
-  );
-
-  const renderResult = () => {
-    if (!result) return null;
     </View>
   );
 
@@ -146,39 +133,11 @@ const AnaSayfa = ({ navigation }) => {
         {Object.entries(answers).map(([question, answer]) => {
           const correctAnswer = cevapAnahtari[question];
           let color = 'black';
-    return Object.entries(result).map(([studentName, answers]) => (
-      <View key={studentName} style={{ marginTop: 20 }}>
-        <Text style={styles.resultHeader}>Sınav Sonucu:</Text>
-        <Text style={styles.studentName}>{studentName}</Text>
-        {Object.entries(answers).map(([question, answer]) => {
-          const correctAnswer = cevapAnahtari[question];
-          let color = 'black';
 
           if (answer === 'None') color = 'gray';
           else if (answer === correctAnswer) color = 'green';
           else color = 'red';
-          if (answer === 'None') color = 'gray';
-          else if (answer === correctAnswer) color = 'green';
-          else color = 'red';
 
-          return (
-            <Text key={question} style={{ color }}>
-              Soru {question}: {answer === 'None' ? 'Boş' : answer} (Doğru: {correctAnswer})
-            </Text>
-          );
-        })}
-      </View>
-    ));
-  };
-
-  return (
-    <FlatList
-      ListHeaderComponent={renderHeader}
-      data={result ? [1] : []}
-      keyExtractor={() => "result"}
-      renderItem={renderResult}
-      contentContainerStyle={styles.container}
-    />
           return (
             <Text key={question} style={{ color }}>
               Soru {question}: {answer === 'None' ? 'Boş' : answer} (Doğru: {correctAnswer})
@@ -207,9 +166,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#e0e0e0',
     flex:1,
-  },
-  headerContainer: {
-    flex: 1,
   },
   title: {
     fontSize: 22,

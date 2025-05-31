@@ -1,21 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { initDatabase, insertAnswerKey } from "../../databases/databaseInit";
 
 const choices = ['A', 'B', 'C', 'D', 'E'];
-
 
 const AnswerKeyScreen = () => {
   const navigation = useNavigation();
 
   const [questionCount, setQuestionCount] = useState('');
   const [answers, setAnswers] = useState([]);
-  const [answerKeyName, setAnswerKeyName] = useState('');
-
-    useEffect(() => {
-    initDatabase();
-  }, []);
 
   // Soru sayısı değişince answers dizisini baştan oluştur
   const handleQuestionCountChange = (text) => {
@@ -41,26 +34,18 @@ const AnswerKeyScreen = () => {
 
   // Gönder butonu için kısa kontrol
   const handleSubmit = () => {
-    if (!answerKeyName.trim()) {
-      Alert.alert('Hata', 'Lütfen cevap anahtarına bir isim verin.');
+    if (answers.length === 0) {
+      Alert.alert('Hata', 'Lütfen soru sayısını girin.');
+      return;
+    }
+    if (answers.includes(null)) {
+      Alert.alert('Hata', 'Tüm sorular için cevap seçin.');
       return;
     }
 
-    // Kaydet
-    insertAnswerKey(answerKeyName.trim(), answers)
-      .then(() => {
-        Alert.alert('Başarılı', 'Cevap anahtarı kaydedildi.');
-        setQuestionCount('');
-        setAnswers([]);
-        setAnswerKeyName('');
-      })
-      .catch((err) => {
-        Alert.alert('Hata', 'Cevap anahtarı kaydedilirken hata oluştu.');
-        console.error(err);
-      });
+    Alert.alert('Cevap Anahtarı', answers.join(''));
+    // Burada backend'e göndermek istersen yapabilirsin
   };
-
-  
 
   return (
     <ScrollView style={styles.container}>
@@ -71,20 +56,11 @@ const AnswerKeyScreen = () => {
 
       <Text style={styles.title}>Cevap Anahtarı Oluştur</Text>
 
-      <Text>Cevap Anahtarı İsmi:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Matematik Deneme 1"
-        value={answerKeyName}
-        onChangeText={setAnswerKeyName}
-      />
-
-
       <Text>Soru Sayısı Giriniz:</Text>
       <TextInput
         keyboardType="numeric"
         style={styles.input}
-        placeholder="20"
+        placeholder="Örn: 10"
         value={questionCount}
         onChangeText={handleQuestionCountChange}
       />
@@ -116,10 +92,6 @@ const AnswerKeyScreen = () => {
         </View>
       ))}
 
-
-      
-
-
       {answers.length > 0 && (
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitText}>Kaydet</Text>
@@ -137,7 +109,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,  // add extra padding so back button doesn’t overlap title
     backgroundColor: '#e0e0e0',
-    backgroundColor: '#fff',
   },
   backButton: {
     position: 'absolute',
