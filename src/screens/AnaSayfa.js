@@ -1,13 +1,31 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Image, StyleSheet, Alert, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  Image,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { Picker } from '@react-native-picker/picker';
+
+// Geçici cevap anahtarı (güncellemek istersen dışarıdan alınabilir)
+const cevapAnahtari = {
+  "1": "A", "2": "B", "3": "C", "4": "D", "5": "E",
+  "6": "A", "7": "B", "8": "C", "9": "D", "10": "E",
+  "11": "A", "12": "B", "13": "C", "14": "D", "15": "E",
+  "16": "A", "17": "B", "18": "C", "19": "D", "20": "E"
+};
 
 const AnaSayfa = ({ navigation }) => {
-  const [image, setImage] = useState(null);
-  const [answerKey, setAnswerKey] = useState('');
+  const [images, setImages] = useState([]);
+  const [selectedValue, setSelectedValue] = useState('20');
+  const [result, setResult] = useState(null);
 
-  // Fotoğraf seçme
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -15,55 +33,119 @@ const AnaSayfa = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImages([...images, result.assets[0].uri]);
     }
   };
 
-  // Gönderme işlemi
-  const handleSubmit = async () => {
-    if (!image || answerKey.trim() === '') {
-      Alert.alert("Uyarı", "Lütfen hem fotoğrafı hem de cevap anahtarını girin.");
+  const uploadImages = async () => {
+    if (images.length === 0) {
+      Alert.alert("Uyarı", "Lütfen önce bir veya daha fazla fotoğraf seçin.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('image', {
-      uri: image,
-      name: 'optik.jpg',
-      type: 'image/jpeg',
+    images.forEach((img, index) => {
+      formData.append('image', {
+        uri: img,
+        name: `photo_${index}.jpg`,
+        type: 'image/jpeg',
+      });
     });
-    formData.append('answerKey', answerKey);
+
+    formData.append('question_number', selectedValue);
 
     try {
-      const response = await axios.post('http://IP_ADRESIN:PORT/oku', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+        'https://flaskserver-7w5d.onrender.com/upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
       console.log("Sonuç:", response.data);
-      Alert.alert("Sonuç", JSON.stringify(response.data));
-
+      setResult(response.data);
     } catch (error) {
       console.error("Gönderme hatası:", error);
       Alert.alert("Hata", "Gönderme sırasında bir sorun oluştu.");
     }
   };
 
+  const clearImages = () => {
+    setImages([]);
+    setResult(null);
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Optik Form Yükle</Text>
 
-      {image && <Image source={{ uri: image }} style={styles.image} />}
       <Button title="Fotoğraf Seç" onPress={pickImage} />
 
+      {images.length > 0 && (
+        <>
+          <ScrollView horizontal style={{ marginVertical: 10 }}>
+            {images.map((img, idx) => (
+              <Image
+                key={idx}
+                source={{ uri: img }}
+                style={styles.imagePreview}
+              />
+            ))}
+          </ScrollView>
+
+          <Text>Seçilen Soru Sayısı: {selectedValue}</Text>
+          <Picker
+            selectedValue={selectedValue}
+            onValueChange={(itemValue) => setSelectedValue(itemValue)}
+          >
+            <Picker.Item label="10 soru" value="10" />
+            <Picker.Item label="20 soru" value="20" />
+            <Picker.Item label="30 soru" value="30" />
+          </Picker>
+
+          <Button title="Gönder ve Oku" onPress={uploadImages} />
+
+          <Button title="Tümünü Temizle" onPress={clearImages} />
+{/* 
+          <TouchableOpacity onPress={clearImages} style={{ marginTop: 10 }}>
+            <Text style={{ color: 'red', textAlign: 'center' }}>Tümünü Temizle</Text>
+          </TouchableOpacity> */}
+        </>
+      )}
 
       <View style={{ marginVertical: 10 }}>
         <Button title="Cevap Anahtarı Sayfası" onPress={() => navigation.navigate('AnswerKey')} />
       </View>
 
-      <Button title="Gönder ve Oku" onPress={handleSubmit} />
-    </View>
+      {result && (
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.resultHeader}>Sınav Sonucu:</Text>
+
+          {Object.entries(result).map(([studentName, answers]) => (
+            <View key={studentName} style={{ marginTop: 10 }}>
+              <Text style={styles.studentName}>{studentName}</Text>
+              {Object.entries(answers).map(([question, answer]) => {
+                const correctAnswer = cevapAnahtari[question];
+                let color = 'black';
+
+                if (answer === 'None') color = 'gray';
+                else if (answer === correctAnswer) color = 'green';
+                else color = 'red';
+
+                return (
+                  <Text key={question} style={{ color }}>
+                    Soru {question}: {answer === 'None' ? 'Boş' : answer} (Doğru: {correctAnswer})
+                  </Text>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+      )}
+    </ScrollView>
   );
 };
 
@@ -71,10 +153,9 @@ export default AnaSayfa;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'flex-start',
+    paddingTop: 50,
+    backgroundColor: '#e0e0e0',
   },
   title: {
     fontSize: 22,
@@ -82,22 +163,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  image: {
-    width: '100%',
-    height: 250,
-    resizeMode: 'contain',
-    marginBottom: 10,
-  },
-  label: {
-    marginTop: 15,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+  imagePreview: {
+    width: 100,
+    height: 100,
+    marginRight: 10,
     borderRadius: 6,
-    padding: 10,
-    marginTop: 5,
+  },
+  resultHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'green',
+  },
+  studentName: {
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
