@@ -6,15 +6,12 @@ import {
   Image,
   StyleSheet,
   Alert,
-  ScrollView,
-  TouchableOpacity,
   FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 
-// Geçici cevap anahtarı (güncellemek istersen dışarıdan alınabilir)
 const cevapAnahtari = {
   "1": "A", "2": "B", "3": "C", "4": "D", "5": "E",
   "6": "A", "7": "B", "8": "C", "9": "D", "10": "E",
@@ -79,10 +76,10 @@ const AnaSayfa = ({ navigation }) => {
     setResult(null);
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
+  // Header content for FlatList
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
       <Text style={styles.title}>Optik Form Yükle</Text>
-
       <Button title="Fotoğraf Seç" onPress={pickImage} />
 
       {images.length > 0 && (
@@ -90,15 +87,13 @@ const AnaSayfa = ({ navigation }) => {
           <FlatList
             data={images}
             keyExtractor={(item, index) => index.toString()}
-            numColumns={3} // Her satıra 3 resim
+            numColumns={3}
             renderItem={({ item }) => (
               <View style={{ flex: 1, margin: 5 }}>
-                <Image
-                  source={{ uri: item }}
-                  style={styles.imagePreview}
-                />
+                <Image source={{ uri: item }} style={styles.imagePreview} />
               </View>
             )}
+            scrollEnabled={false} // Yalnızca ana liste scroll edebilir
             contentContainerStyle={{ paddingVertical: 10 }}
           />
 
@@ -113,45 +108,52 @@ const AnaSayfa = ({ navigation }) => {
           </Picker>
 
           <Button title="Gönder ve Oku" onPress={uploadImages} />
-
           <Button title="Tümünü Temizle" onPress={clearImages} />
-          {/* 
-          <TouchableOpacity onPress={clearImages} style={{ marginTop: 10 }}>
-            <Text style={{ color: 'red', textAlign: 'center' }}>Tümünü Temizle</Text>
-          </TouchableOpacity> */}
         </>
       )}
 
       <View style={{ marginVertical: 10 }}>
-        <Button title="Cevap Anahtarı Sayfası" onPress={() => navigation.navigate('AnswerKey')} />
+        <Button
+          title="Cevap Anahtarı Sayfası"
+          onPress={() => navigation.navigate('AnswerKey')}
+        />
       </View>
+    </View>
+  );
 
-      {result && (
-        <View style={{ marginTop: 20 }}>
-          <Text style={styles.resultHeader}>Sınav Sonucu:</Text>
+  const renderResult = () => {
+    if (!result) return null;
 
-          {Object.entries(result).map(([studentName, answers]) => (
-            <View key={studentName} style={{ marginTop: 10 }}>
-              <Text style={styles.studentName}>{studentName}</Text>
-              {Object.entries(answers).map(([question, answer]) => {
-                const correctAnswer = cevapAnahtari[question];
-                let color = 'black';
+    return Object.entries(result).map(([studentName, answers]) => (
+      <View key={studentName} style={{ marginTop: 20 }}>
+        <Text style={styles.resultHeader}>Sınav Sonucu:</Text>
+        <Text style={styles.studentName}>{studentName}</Text>
+        {Object.entries(answers).map(([question, answer]) => {
+          const correctAnswer = cevapAnahtari[question];
+          let color = 'black';
 
-                if (answer === 'None') color = 'gray';
-                else if (answer === correctAnswer) color = 'green';
-                else color = 'red';
+          if (answer === 'None') color = 'gray';
+          else if (answer === correctAnswer) color = 'green';
+          else color = 'red';
 
-                return (
-                  <Text key={question} style={{ color }}>
-                    Soru {question}: {answer === 'None' ? 'Boş' : answer} (Doğru: {correctAnswer})
-                  </Text>
-                );
-              })}
-            </View>
-          ))}
-        </View>
-      )}
-    </ScrollView>
+          return (
+            <Text key={question} style={{ color }}>
+              Soru {question}: {answer === 'None' ? 'Boş' : answer} (Doğru: {correctAnswer})
+            </Text>
+          );
+        })}
+      </View>
+    ));
+  };
+
+  return (
+    <FlatList
+      ListHeaderComponent={renderHeader}
+      data={result ? [1] : []}
+      keyExtractor={() => "result"}
+      renderItem={renderResult}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
@@ -161,7 +163,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#e0e0e0',
-    justifyContent: 'flex-start',
+  },
+  headerContainer: {
     flex: 1,
   },
   title: {
@@ -173,7 +176,6 @@ const styles = StyleSheet.create({
   imagePreview: {
     width: 100,
     height: 100,
-    marginRight: 10,
     borderRadius: 6,
   },
   resultHeader: {
