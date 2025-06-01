@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { initDatabase, insertAnswerKey } from '../../databases/database'; // database.js dosyanızın yolunu güncelleyin
 
 const choices = ['A', 'B', 'C', 'D', 'E'];
 
 const AnswerKeyScreen = () => {
   const navigation = useNavigation();
 
+  const [examName, setExamName] = useState('');
   const [questionCount, setQuestionCount] = useState('');
   const [answers, setAnswers] = useState([]);
+
+  // Component mount olduğunda database'i başlat
+  useEffect(() => {
+    initDatabase();
+  }, []);
 
   // Soru sayısı değişince answers dizisini baştan oluştur
   const handleQuestionCountChange = (text) => {
@@ -33,22 +40,56 @@ const AnswerKeyScreen = () => {
   };
 
   // Gönder butonu için kısa kontrol
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!examName.trim()) {
+      Alert.alert('Hata', 'Lütfen sınav ismini girin.');
+      return;
+    }
+    
     if (answers.length === 0) {
       Alert.alert('Hata', 'Lütfen soru sayısını girin.');
       return;
     }
+    
     if (answers.includes(null)) {
       Alert.alert('Hata', 'Tüm sorular için cevap seçin.');
       return;
     }
 
-    Alert.alert('Cevap Anahtarı', answers.join(''));
-    // Burada backend'e göndermek istersen yapabilirsin
+    try {
+      // Cevapları string olarak birleştir (örn: "ABCDE")
+      const answersString = answers.join('');
+      
+      // Veritabanına kaydet
+      await insertAnswerKey(examName.trim(), answersString);
+      
+      // Başarılı kayıt sonrası formu temizle
+      setExamName('');
+      setQuestionCount('');
+      setAnswers([]);
+      
+      Alert.alert(
+        'Başarılı', 
+        `Cevap anahtarı kaydedildi!\nSınav: ${examName}\nCevaplar: ${answersString}`,
+        [
+          {
+            text: 'Tamam',
+            onPress: () => navigation.goBack()
+          }
+        ]
+      );
+      
+    } catch (error) {
+      Alert.alert('Hata', 'Kayıt sırasında bir hata oluştu: ' + error.message);
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={true}
+    >
       {/* Back button top-left */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>←</Text>
@@ -56,7 +97,15 @@ const AnswerKeyScreen = () => {
 
       <Text style={styles.title}>Cevap Anahtarı Oluştur</Text>
 
-      <Text>Soru Sayısı Giriniz:</Text>
+      <Text>Sınav İsmini Giriniz:</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder='Matematik'
+        value={examName}
+        onChangeText={setExamName}
+      />
+
+      <Text style={{marginTop: 10}}>Soru Sayısı Giriniz:</Text>
       <TextInput
         keyboardType="numeric"
         style={styles.input}
@@ -106,24 +155,27 @@ export default AnswerKeyScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    paddingTop: 60,  // add extra padding so back button doesn’t overlap title
     backgroundColor: '#e0e0e0',
+  },
+  contentContainer: {
+    padding: 20,
+    paddingTop: 33,  // add extra padding so back button doesn't overlap title
+    paddingBottom: 100, // Kaydet butonu için extra alan
   },
   backButton: {
     position: 'absolute',
-    top: -50,
-    left: -10,
+    top: 10,
+    left: 10,
     backgroundColor: 'grey',
-    
-    paddingBottom: 12,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 30,
     zIndex: 10,
   },
   backButtonText: {
+    marginBottom: 5,
     color: '#fff',
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: 'bold',
   },
   title: {

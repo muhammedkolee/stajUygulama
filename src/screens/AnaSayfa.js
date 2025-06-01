@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,13 @@ import {
   StyleSheet,
   Alert,
   FlatList,
+  TouchableHighlight,
+  Pressable,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
+import { getAllAnswerKeys, getAnswerKeyById } from '../../databases/database'; // database.js dosyanızın yolunu güncelleyin
 
 const cevapAnahtari = {
   "1": "A", "2": "B", "3": "C", "4": "D", "5": "E",
@@ -23,8 +26,65 @@ const cevapAnahtari = {
 
 const AnaSayfa = ({ navigation }) => {
   const [images, setImages] = useState([]);
-  const [selectedValue, setSelectedValue] = useState('20');
+  const [questionNumber, setQuestionNumber] = useState('20');
+  const [selectedAnswerKey, setSelectedAnswerKey] = useState(null);
+  const [answerKeys, setAnswerKeys] = useState([]);
+  const [currentAnswerKeyData, setCurrentAnswerKeyData] = useState(null);
   const [result, setResult] = useState(null);
+
+  // Component mount olduğunda cevap anahtarlarını yükle
+  useEffect(() => {
+    loadAnswerKeys();
+  }, []);
+
+  // Cevap anahtarları değiştiğinde ekranı yenile (AnswerKey ekranından dönüldüğünde)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadAnswerKeys();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // Seçilen cevap anahtarı değiştiğinde detaylarını yükle
+  useEffect(() => {
+    if (selectedAnswerKey) {
+      loadAnswerKeyDetails(selectedAnswerKey);
+    }
+  }, [selectedAnswerKey]);
+
+  const loadAnswerKeys = async () => {
+    try {
+      const keys = await getAllAnswerKeys();
+      setAnswerKeys(keys);
+      
+      // Eğer daha önce seçili bir cevap anahtarı varsa ve artık mevcut değilse, seçimi temizle
+      if (selectedAnswerKey && !keys.find(key => key.id === selectedAnswerKey)) {
+        setSelectedAnswerKey(null);
+        setCurrentAnswerKeyData(null);
+      }
+    } catch (error) {
+      console.error('Cevap anahtarları yüklenirken hata:', error);
+      Alert.alert('Hata', 'Cevap anahtarları yüklenirken bir sorun oluştu.');
+    }
+  };
+
+  const loadAnswerKeyDetails = async (keyId) => {
+    try {
+      const keyData = await getAnswerKeyById(keyId);
+      if (keyData) {
+        // Cevap string'ini objeye çevir
+        const answersObject = {};
+        const answersString = keyData.answers;
+        for (let i = 0; i < answersString.length; i++) {
+          answersObject[(i + 1).toString()] = answersString[i];
+        }
+        setCurrentAnswerKeyData(answersObject);
+      }
+    } catch (error) {
+      console.error('Cevap anahtarı detayları yüklenirken hata:', error);
+    }
+  };
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -43,6 +103,11 @@ const AnaSayfa = ({ navigation }) => {
       return;
     }
 
+    if (!selectedAnswerKey) {
+      Alert.alert("Uyarı", "Lütfen bir cevap anahtarı seçin.");
+      return;
+    }
+
     const formData = new FormData();
     images.forEach((img, index) => {
       formData.append('image', {
@@ -52,7 +117,7 @@ const AnaSayfa = ({ navigation }) => {
       });
     });
 
-    formData.append('question_number', selectedValue);
+    formData.append('question_number', questionNumber);
 
     try {
       const response = await axios.post(
@@ -78,11 +143,14 @@ const AnaSayfa = ({ navigation }) => {
     setResult(null);
   };
 
-
   const renderHeader = () => (
     <View>
       <Text style={styles.title}>Optik Form Yükle</Text>
-      <Button title="Fotoğraf Seç" onPress={pickImage} />
+      <TouchableHighlight style={{marginBottom: 8}} onPress={pickImage}>
+        <View style={styles.buttonView}>
+          <Text style={styles.buttonText}>Fotoğraf Seç</Text>
+        </View>
+      </TouchableHighlight>
 
       {images.length > 0 && (
         <>
@@ -99,39 +167,77 @@ const AnaSayfa = ({ navigation }) => {
             contentContainerStyle={{ paddingVertical: 10 }}
           />
 
-          <Text>Seçilen Soru Sayısı: {selectedValue}</Text>
+          <Text>Seçilen Soru Sayısı: {questionNumber}</Text>
           <Picker
-            selectedValue={selectedValue}
-            onValueChange={(itemValue) => setSelectedValue(itemValue)}
+            selectedValue={questionNumber}
+            onValueChange={(itemValue) => setQuestionNumber(itemValue)}
           >
             <Picker.Item label="10 soru" value="10" />
             <Picker.Item label="20 soru" value="20" />
             <Picker.Item label="30 soru" value="30" />
           </Picker>
 
-          <Button title="Gönder ve Oku" onPress={uploadImages} />
-          <Button title="Tümünü Temizle" onPress={clearImages} />
+          <TouchableHighlight style={{marginBottom: 8}} onPress={uploadImages}>
+            <View style={styles.buttonView}>
+              <Text style={styles.buttonText}>Gönder ve Oku</Text>
+            </View>
+          </TouchableHighlight>
+
+          <TouchableHighlight style={{marginBottom: 8}} onPress={clearImages}>
+            <View style={styles.buttonView}>
+              <Text style={styles.buttonText}>Tümünü Temizle</Text>
+            </View>
+          </TouchableHighlight>
         </>
       )}
 
-      <View style={{ marginVertical: 10 }}>
-        <Button
-          title="Cevap Anahtarı Sayfası"
-          onPress={() => navigation.navigate('AnswerKey')}
-        />
-      </View>
+      <TouchableHighlight style={{marginBottom: 8}} onPress={() => navigation.navigate('AnswerKey')}>
+        <View style={styles.buttonView}>
+          <Text style={styles.buttonText}>Cevap Anahtarı Ekle</Text>
+        </View>
+      </TouchableHighlight>
+
+      <Text style={styles.pickerLabel}>Cevap Anahtarı Seçin:</Text>
+      <Picker
+        selectedValue={selectedAnswerKey}
+        onValueChange={(itemValue) => setSelectedAnswerKey(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Cevap anahtarı seçin..." value={null} />
+        {answerKeys.map((key) => (
+          <Picker.Item 
+            key={key.id} 
+            label={key.name} 
+            value={key.id} 
+          />
+        ))}
+      </Picker>
+
+      {selectedAnswerKey && currentAnswerKeyData && (
+        <View style={styles.selectedAnswerKeyInfo}>
+          <Text style={styles.selectedAnswerKeyTitle}>
+            Seçilen Cevap Anahtarı: {answerKeys.find(k => k.id === selectedAnswerKey)?.name}
+          </Text>
+          <Text style={styles.selectedAnswerKeyPreview}>
+            Cevaplar: {Object.values(currentAnswerKeyData).join('')}
+          </Text>
+        </View>
+      )}
     </View>
   );
 
   const renderResult = () => {
     if (!result) return null;
 
+    // Mevcut cevap anahtarını kullan, yoksa eski sabit cevap anahtarını kullan
+    const activeAnswerKey = currentAnswerKeyData || cevapAnahtari;
+
     return Object.entries(result).map(([studentName, answers]) => (
       <View key={studentName} style={{ marginTop: 20 }}>
         <Text style={styles.resultHeader}>Sınav Sonucu:</Text>
         <Text style={styles.studentName}>{studentName}</Text>
         {Object.entries(answers).map(([question, answer]) => {
-          const correctAnswer = cevapAnahtari[question];
+          const correctAnswer = activeAnswerKey[question];
           let color = 'black';
 
           if (answer === 'None') color = 'gray';
@@ -165,7 +271,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#e0e0e0',
-    flex:1,
+    flex: 1,
   },
   title: {
     fontSize: 22,
@@ -186,5 +292,40 @@ const styles = StyleSheet.create({
   studentName: {
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  buttonView: {
+    backgroundColor: "#0066ff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 20,
+    color: "white",
+    marginTop: 10,
+    marginBottom: 10
+  },
+  pickerLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  picker: {
+    marginBottom: 15,
+  },
+  selectedAnswerKeyInfo: {
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  selectedAnswerKeyTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  selectedAnswerKeyPreview: {
+    fontSize: 14,
+    color: '#666',
   },
 });
