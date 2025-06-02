@@ -3,7 +3,6 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 
 import StackNavigator from './StackNavigator'; // stack tanımını getir
 import Optikler from '../screens/Optikler';
-import Ayarlar from '../screens/Ayarlar';
 import Hakkinda from '../screens/Hakkinda';
 import AnswerKeyScreen from '../screens/AnswerKeyScreen';
 import AnswerKeys from '../screens/AnswerKeys';
@@ -70,19 +69,6 @@ export default function DrawerNavigation() {
           drawerIcon: ({ focused }) => (
             <Image
               source={require('../../assets/OptikImage.png')}
-              style={[styles.icon, { tintColor: focused ? '#fff' : '#ccc' }]}
-            />
-          )
-        }}
-      />
-      <Drawer.Screen 
-        name="Ayarlar" 
-        component={Ayarlar} 
-        options={{
-          drawerLabel: 'Ayarlar',
-          drawerIcon: ({ focused }) => (
-            <Image
-              source={require('../../assets/settings.png')}
               style={[styles.icon, { tintColor: focused ? '#fff' : '#ccc' }]}
             />
           )

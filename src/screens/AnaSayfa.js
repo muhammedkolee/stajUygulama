@@ -185,7 +185,9 @@ const uploadImages = async () => {
             onValueChange={(itemValue) => setQuestionNumber(itemValue)}
           >
             <Picker.Item label="10 soru" value="10" />
+            <Picker.Item label="15 soru" value="15" />
             <Picker.Item label="20 soru" value="20" />
+            <Picker.Item label="25 soru" value="25" />
             <Picker.Item label="30 soru" value="30" />
           </Picker>
 
