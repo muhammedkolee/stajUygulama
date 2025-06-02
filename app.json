@@ -4,9 +4,9 @@
     "slug": "stajUygulama",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/appIcon.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -20,8 +20,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.muhammedkolee.stajUygulama"
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,11 +28,6 @@
     "plugins": [
       "expo-sqlite",
       "expo-asset"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "9d5c9a6d-ec84-4c8d-b658-8283c70f982f"
-      }
-    }
+    ]
   }
 }
