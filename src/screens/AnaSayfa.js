@@ -13,7 +13,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
-import { getAllAnswerKeys, getAnswerKeyById } from '../../databases/database'; // database.js dosyanızın yolunu güncelleyin
+import { getAllAnswerKeys, getAnswerKeyById, initDatabase } from '../../databases/database'; // database.js dosyanızın yolunu güncelleyin
+
 
 const cevapAnahtari = {
   "1": "A", "2": "B", "3": "C", "4": "D", "5": "E",
@@ -21,8 +22,6 @@ const cevapAnahtari = {
   "11": "A", "12": "B", "13": "C", "14": "D", "15": "E",
   "16": "A", "17": "B", "18": "C", "19": "D", "20": "E"
 };
-
-// Merhaba
 
 const AnaSayfa = ({ navigation }) => {
   const [images, setImages] = useState([]);
@@ -34,6 +33,7 @@ const AnaSayfa = ({ navigation }) => {
 
   // Component mount olduğunda cevap anahtarlarını yükle
   useEffect(() => {
+    initDatabase();
     loadAnswerKeys();
   }, []);
 
@@ -97,46 +97,66 @@ const AnaSayfa = ({ navigation }) => {
     }
   };
 
-  const uploadImages = async () => {
-    if (images.length === 0) {
-      Alert.alert("Uyarı", "Lütfen önce bir veya daha fazla fotoğraf seçin.");
-      return;
-    }
+const uploadImages = async () => {
+  if (images.length === 0) {
+    Alert.alert("Uyarı", "Lütfen önce bir veya daha fazla fotoğraf seçin.");
+    return;
+  }
 
-    if (!selectedAnswerKey) {
-      Alert.alert("Uyarı", "Lütfen bir cevap anahtarı seçin.");
-      return;
-    }
+  if (!selectedAnswerKey) {
+    Alert.alert("Uyarı", "Lütfen bir cevap anahtarı seçin.");
+    return;
+  }
 
-    const formData = new FormData();
-    images.forEach((img, index) => {
-      formData.append('image', {
-        uri: img,
-        name: `photo_${index}.jpg`,
-        type: 'image/jpeg',
-      });
+  const formData = new FormData();
+  images.forEach((img, index) => {
+    formData.append('image', {
+      uri: img,
+      name: `photo_${index}.jpg`,
+      type: 'image/jpeg',
     });
+  });
 
-    formData.append('question_number', questionNumber);
+  formData.append('question_number', questionNumber);
 
-    try {
-      const response = await axios.post(
-        'https://flaskserver-7w5d.onrender.com/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+  try {
+    const response = await axios.post(
+      'https://flaskserver-7w5d.onrender.com/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
 
-      console.log("Sonuç:", response.data);
-      setResult(response.data);
-    } catch (error) {
-      console.error("Gönderme hatası:", error);
-      Alert.alert("Hata", "Gönderme sırasında bir sorun oluştu.");
-    }
-  };
+    // console.log("Sunucu Yanıtı:", response.data);
+    
+    // Orijinal görselleri öğrenci isimleriyle eşleştir
+    const studentsWithImages = {};
+    const studentNames = Object.keys(response.data);
+    
+    studentNames.forEach((studentName, index) => {
+      studentsWithImages[studentName] = {
+        answers: response.data[studentName],
+        originalImageUri: images[index] || null // Orijinal yüklenen görsel URI'si
+      };
+    });
+    
+    // console.log("İşlenmiş Veri:", studentsWithImages);
+    
+    // Result sayfasına yönlendir
+    navigation.navigate('Result', {
+      resultData: studentsWithImages,
+      selectedAnswerKeyId: selectedAnswerKey,
+      questionCount: questionNumber
+    });
+    
+  } catch (error) {
+    console.error("Gönderme hatası:", error);
+    Alert.alert("Hata", "Gönderme sırasında bir sorun oluştu.");
+  }
+};
 
   const clearImages = () => {
     setImages([]);

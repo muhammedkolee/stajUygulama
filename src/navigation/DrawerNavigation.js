@@ -6,6 +6,7 @@ import Gecmis from '../screens/Gecmis';
 import Ayarlar from '../screens/Ayarlar';
 import Hakkinda from '../screens/Hakkinda';
 import AnswerKeyScreen from '../screens/AnswerKeyScreen';
+import Result  from '../screens/Result';
 
 const Drawer = createDrawerNavigator();
 
@@ -110,6 +111,17 @@ export default function DrawerNavigation() {
           title: "Cevap Anahtarı" }}
       >
       </Drawer.Screen>
+      <Drawer.Screen
+      name="Result" 
+      component={Result} 
+      options={{ 
+        drawerLabel: () => null,
+        drawerIcon: () => null,
+        swipeEnabled: false,
+        drawerItemStyle: { height: 0 },
+        title: "Sınav Sonuçları" 
+      }}
+      ></Drawer.Screen>
     </Drawer.Navigator>
   );
 }
