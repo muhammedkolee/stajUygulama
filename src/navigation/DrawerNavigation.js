@@ -2,7 +2,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '
 import { View, Text, Image, StyleSheet } from 'react-native';
 
 import StackNavigator from './StackNavigator'; // stack tanımını getir
-import Gecmis from '../screens/Gecmis';
+import Optikler from '../screens/Optikler';
 import Ayarlar from '../screens/Ayarlar';
 import Hakkinda from '../screens/Hakkinda';
 import AnswerKeyScreen from '../screens/AnswerKeyScreen';
@@ -63,13 +63,13 @@ export default function DrawerNavigation() {
         }}
       />
       <Drawer.Screen 
-        name="Gecmis" 
-        component={Gecmis} 
+        name="Optikler" 
+        component={Optikler} 
         options={{
-          drawerLabel: 'Geçmiş',
+          drawerLabel: 'Optikler',
           drawerIcon: ({ focused }) => (
             <Image
-              source={require('../../assets/history.png')}
+              source={require('../../assets/OptikImage.png')}
               style={[styles.icon, { tintColor: focused ? '#fff' : '#ccc' }]}
             />
           )
