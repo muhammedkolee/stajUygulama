@@ -3,7 +3,8 @@ import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert 
 import { useNavigation } from '@react-navigation/native';
 import { initDatabase, insertAnswerKey } from '../../databases/database'; // database.js dosyanızın yolunu güncelleyin
 
-const choices = ['A', 'B', 'C', 'D', 'E'];
+ // Şık harfleri
+  const choices = ['A', 'B', 'C', 'D', 'E'];
 
 const AnswerKeyScreen = () => {
   const navigation = useNavigation();

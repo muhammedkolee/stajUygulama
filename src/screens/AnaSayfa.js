@@ -15,14 +15,6 @@ import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import { getAllAnswerKeys, getAnswerKeyById, initDatabase } from '../../databases/database'; // database.js dosyanızın yolunu güncelleyin
 
-
-const cevapAnahtari = {
-  "1": "A", "2": "B", "3": "C", "4": "D", "5": "E",
-  "6": "A", "7": "B", "8": "C", "9": "D", "10": "E",
-  "11": "A", "12": "B", "13": "C", "14": "D", "15": "E",
-  "16": "A", "17": "B", "18": "C", "19": "D", "20": "E"
-};
-
 const AnaSayfa = ({ navigation }) => {
   const [images, setImages] = useState([]);
   const [questionNumber, setQuestionNumber] = useState('20');
@@ -210,6 +202,12 @@ const uploadImages = async () => {
           </TouchableHighlight>
         </>
       )}
+
+      <TouchableHighlight style={{marginBottom: 8}} onPress={() => navigation.navigate('AnswerKeys')}>
+        <View style={styles.buttonView}>
+          <Text style={styles.buttonText}>Cevap Anahtarlarını Göster</Text>
+        </View>
+      </TouchableHighlight>
 
       <TouchableHighlight style={{marginBottom: 8}} onPress={() => navigation.navigate('AnswerKey')}>
         <View style={styles.buttonView}>

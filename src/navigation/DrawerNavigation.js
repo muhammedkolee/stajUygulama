@@ -6,6 +6,7 @@ import Gecmis from '../screens/Gecmis';
 import Ayarlar from '../screens/Ayarlar';
 import Hakkinda from '../screens/Hakkinda';
 import AnswerKeyScreen from '../screens/AnswerKeyScreen';
+import AnswerKeys from '../screens/AnswerKeys';
 import Result  from '../screens/Result';
 
 const Drawer = createDrawerNavigator();
@@ -109,6 +110,17 @@ export default function DrawerNavigation() {
           swipeEnabled: false,
           drawerItemStyle: { height: 0 },
           title: "Cevap Anahtarı" }}
+      >
+      </Drawer.Screen>
+      <Drawer.Screen
+        name="AnswerKeys" 
+        component={AnswerKeys} 
+        options={{ 
+          drawerLabel: () => null,
+          drawerIcon: () => null,
+          swipeEnabled: false,
+          drawerItemStyle: { height: 0 },
+          title: "Cevap Anahtarları" }}
       >
       </Drawer.Screen>
       <Drawer.Screen

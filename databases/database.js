@@ -30,6 +30,17 @@ export const getAllAnswerKeys = async () => {
   }
 };
 
+// Cevap anahtarını sil
+export const deleteAnswer = async (id) => {
+  try {
+    await db.runAsync("DELETE FROM answer_keys WHERE id = ?", [id]);
+    Alert.alert("İşlem Başarılı!", "Cevap anahtarı başarıyla silindi.")
+  } catch (error) {
+    Alert.alert("Silme işlemi sırasında bir hata oluştu!", error.message);
+    throw error
+  }
+}
+
 // Yeni cevap anahtarı ekle
 export const insertAnswerKey = async (name, answers) => {
   try {
@@ -38,6 +49,17 @@ export const insertAnswerKey = async (name, answers) => {
   } catch (error) {
     Alert.alert("Ekleme sırasında bir hata oluştu.\n", error.message);
     throw error; // Hata durumunda yukarı fırlat
+  }
+};
+
+// Cevap anahtarını güncelle
+export const updateAnswerKey = async (id, name, answers) => {
+  try {
+    await db.runAsync('UPDATE answer_keys SET name = ?, answers = ? WHERE id = ?', [name, answers, id]);
+    Alert.alert("İşlem başarılı!", "Cevap anahtarı güncellendi.");
+  } catch (error) {
+    Alert.alert("Güncelleme sırasında bir hata oluştu.\n", error.message);
+    throw error;
   }
 };
 
